@@ -356,7 +356,7 @@ def findseq(needle, haystack='*', selName=None, het=0, firstOnly=0):
         it = reNeedle.finditer(chain_sequence)
         for i in it:
             start, stop = i.span()
-            resi = "+".join(IDs[key][start:stop])
+            resi = "+".join(IDs[chain_obj][start:stop])
 
             sel = f'__h and %{obj} and resi {resi}'
 
