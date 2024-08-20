@@ -347,13 +347,12 @@ def findseq(needle, haystack='*', selName=None, het=0, firstOnly=0):
             AAs[(obj, atom.segi, atom.chain)].append(ONE_LETTER[atom.resn])
 
     reNeedle = re.compile(needle.upper())
-    # make an empty selection to which we add residues
-    cmd.select(rSelName, 'None')
 
-    for key in AAs:
-        obj, segi, chain = key
+    matches = []
+    for chain_obj in AAs:
+        obj, segi, chain = chain_obj
 
-        chain_sequence = "".join(AAs[key])
+        chain_sequence = "".join(AAs[chain_obj])
         it = reNeedle.finditer(chain_sequence)
         for i in it:
             start, stop = i.span()
@@ -366,11 +365,14 @@ def findseq(needle, haystack='*', selName=None, het=0, firstOnly=0):
             if segi:
                 sel += f' and segi {segi}'
 
-            sel = f'{rSelName} or ({sel})'
-            cmd.select(rSelName, sel)
+            matches.append(f"({sel})")
 
-            if int(firstOnly):
-                break
+        if int(firstOnly) and matches:
+            matches = matches[:1]
+            break
+
+    # select all residues that match
+    cmd.select(rSelName, " or ".join(matches))    
 
     cmd.delete("__h")
     cnt = cmd.count_atoms(rSelName)
